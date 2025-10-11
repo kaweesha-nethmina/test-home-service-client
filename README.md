@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HomeServe - Home Service Management System
+
+A modern, full-stack home service management platform connecting homeowners with trusted service providers.
+
+## Features
+
+- **Multi-role Authentication**: Customer, Provider, and Admin roles
+- **Service Management**: Browse, book, and manage home services
+- **Provider Portfolio**: Showcase work with image uploads
+- **Booking System**: Schedule and track service appointments
+- **Admin Dashboard**: Manage users, services, and bookings
+- **Support System**: Complaints, ratings, and notifications
+- **Payment Integration**: Mock payment processing
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 18, TypeScript
+- **Styling**: Tailwind CSS v4
+- **State Management**: React Context + Hooks
+- **HTTP Client**: Axios
+- **UI Components**: shadcn/ui
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18+ 
+- Backend API running (see backend repo)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository
+2. Install dependencies:
+   \`\`\`bash
+   npm install
+   \`\`\`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Create a `.env.local` file:
+   \`\`\`env
+   VITE_API_URL=http://localhost:5000
+   \`\`\`
 
-## Learn More
+4. Run the development server:
+   \`\`\`bash
+   npm run dev
+   \`\`\`
 
-To learn more about Next.js, take a look at the following resources:
+5. Open [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `VITE_API_URL`: Backend API base URL (default: http://localhost:5000)
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+\`\`\`
+src/
+├── app/                    # Next.js app directory
+├── components/             # React components
+│   ├── ui/                # shadcn/ui components
+│   └── shared/            # Shared components
+├── hooks/                 # Custom React hooks
+├── lib/                   # Utilities and API client
+├── services/              # API service functions
+└── types/                 # TypeScript type definitions
+\`\`\`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## API Integration
+
+The app connects to the backend API using Axios with automatic JWT token management. All API calls include the Authorization header when a user is logged in.
+
+## Role-Based Access
+
+- **Customer**: Browse services, book appointments, view bookings
+- **Provider**: Manage profile, showcase work, handle bookings
+- **Admin**: Manage users, services, categories, and system settings
+
+## License
+
+MIT
