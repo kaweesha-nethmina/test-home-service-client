@@ -35,7 +35,7 @@ export default function SupportPage() {
   async function loadComplaints() {
     try {
       const data = await supportService.getComplaints()
-      setComplaints(data)
+      setComplaints(data.data || data)
     } catch (error) {
       toast({
         title: "Failed to load complaints",

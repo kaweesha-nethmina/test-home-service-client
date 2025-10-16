@@ -213,7 +213,7 @@ export default function ServiceDetailPage() {
             <ProviderList providers={providers} serviceId={service._id} />
 
             {/* Reviews */}
-            <ServiceReviews />
+            <ServiceReviews serviceId={service._id} providerId={service.providerId} />
           </div>
 
           <div className="space-y-6">

@@ -3,17 +3,25 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { supportService } from "@/services/supportService"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { adminService } from "@/services/adminService"
 import type { Complaint } from "@/types/api"
 import { AlertCircle, MessageSquare } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRequireAuth } from "@/hooks/useRequireAuth"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
-export default function ProviderSupportPage() {
-  const { isLoading: authLoading } = useRequireAuth({ roles: ["provider"] })
+export default function AdminSupportComplaintsPage() {
+  const { isLoading: authLoading } = useRequireAuth({ roles: ["admin"] })
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null)
+  const [assignData, setAssignData] = useState({ assignedTo: "" })
   const { toast } = useToast()
 
   useEffect(() => {
@@ -24,10 +32,8 @@ export default function ProviderSupportPage() {
 
   async function loadComplaints() {
     try {
-      const data = await supportService.getComplaints()
-      // For now, just set all complaints - the backend might already filter by provider
-      const allComplaints = Array.isArray(data) ? data : data.data || []
-      setComplaints(allComplaints)
+      const data = await adminService.getAllComplaints()
+      setComplaints(data.data || data)
     } catch (error) {
       toast({
         title: "Failed to load complaints",
@@ -41,14 +47,31 @@ export default function ProviderSupportPage() {
 
   async function handleStatusChange(complaintId: string, newStatus: string) {
     try {
-      await supportService.updateComplaintStatus(complaintId, newStatus)
-      setComplaints(complaints.map((c) => (c._id === complaintId ? { ...c, status: newStatus as any } : c)))
+      const response = await adminService.updateComplaintStatus(complaintId, { status: newStatus })
+      const updatedComplaint = response.data || response
+      setComplaints(complaints.map((c) => (c._id === complaintId ? updatedComplaint : c)))
       toast({ title: "Status updated", description: "Complaint status has been changed" })
-    } catch (error: any) {
-      console.error("Failed to update complaint status:", error)
+    } catch (error) {
       toast({
         title: "Update failed",
-        description: error.response?.data?.message || "You don't have permission to update this complaint or it's not assigned to you",
+        description: "Failed to update complaint status",
+        variant: "destructive",
+      })
+    }
+  }
+
+  async function handleAssign(complaintId: string) {
+    try {
+      const response = await adminService.updateComplaintStatus(complaintId, { assignedTo: assignData.assignedTo })
+      const updatedComplaint = response.data || response
+      setComplaints(complaints.map((c) => (c._id === complaintId ? updatedComplaint : c)))
+      toast({ title: "Complaint assigned", description: "Complaint has been assigned to a user" })
+      setIsDialogOpen(false)
+      setAssignData({ assignedTo: "" })
+    } catch (error) {
+      toast({
+        title: "Assignment failed",
+        description: "Failed to assign complaint",
         variant: "destructive",
       })
     }
@@ -87,8 +110,8 @@ export default function ProviderSupportPage() {
   return (
     <div className="p-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Support & Complaints</h1>
-        <p className="text-muted-foreground">Manage customer complaints and support requests</p>
+        <h1 className="text-3xl font-bold mb-2">Support Complaints</h1>
+        <p className="text-muted-foreground">Manage all customer complaints and support requests</p>
       </div>
 
       {complaints.length === 0 ? (
@@ -114,7 +137,7 @@ export default function ProviderSupportPage() {
                         <div>
                           <h3 className="font-semibold text-lg">{complaint.subject}</h3>
                           <p className="text-sm text-muted-foreground">
-                            From: {complaint.user?.firstName} {complaint.user?.lastName}
+                            From: {complaint.user?.firstName} {complaint.user?.lastName} ({complaint.user?.email})
                           </p>
                         </div>
                       </div>
@@ -140,6 +163,36 @@ export default function ProviderSupportPage() {
                         <SelectItem value="closed">Closed</SelectItem>
                       </SelectContent>
                     </Select>
+                    <Dialog open={isDialogOpen && selectedComplaint?._id === complaint._id} onOpenChange={(open) => {
+                      setIsDialogOpen(open)
+                      if (!open) setSelectedComplaint(null)
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => setSelectedComplaint(complaint)}>
+                          Assign
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Assign Complaint</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="assignedTo">Assign to User ID</Label>
+                            <Input
+                              id="assignedTo"
+                              value={assignData.assignedTo}
+                              onChange={(e) => setAssignData({ ...assignData, assignedTo: e.target.value })}
+                              placeholder="Enter user ID"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button onClick={() => handleAssign(complaint._id)}>Assign</Button>
+                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </CardContent>

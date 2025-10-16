@@ -1,43 +1,120 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Star } from "lucide-react"
+import { feedbackService } from "@/services/feedbackService"
+import type { Feedback } from "@/types/api"
 
-interface Review {
-  id: string
-  userName: string
-  rating: number
-  comment: string
-  date: string
+interface ServiceReviewsProps {
+  serviceId?: string
+  providerId?: string
 }
 
-const mockReviews: Review[] = [
-  {
-    id: "1",
-    userName: "John Doe",
-    rating: 5,
-    comment: "Excellent service! The provider was professional and completed the work on time.",
-    date: "2023-10-15"
-  },
-  {
-    id: "2",
-    userName: "Sarah Smith",
-    rating: 4,
-    comment: "Very satisfied with the quality of work. Will definitely use this service again.",
-    date: "2023-10-10"
-  },
-  {
-    id: "3",
-    userName: "Michael Johnson",
-    rating: 5,
-    comment: "Outstanding service from start to finish. Highly recommended!",
-    date: "2023-10-05"
-  }
-]
+export function ServiceReviews({ serviceId, providerId }: ServiceReviewsProps) {
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
+  const [loading, setLoading] = useState(true)
 
-export function ServiceReviews() {
-  const averageRating = mockReviews.reduce((sum, review) => sum + review.rating, 0) / mockReviews.length
+  useEffect(() => {
+    async function loadFeedbacks() {
+      try {
+        let data: any[] = [];
+        
+        // If we have a serviceId, fetch feedback for that service (preferred)
+        if (serviceId) {
+          const response = await feedbackService.getServiceFeedback(serviceId)
+          data = response.data || response
+        }
+        // Fallback to provider feedback if serviceId is not available
+        else if (providerId) {
+          const response = await feedbackService.getPublicFeedback(providerId)
+          data = response.data || response
+        }
+        
+        // Show all feedbacks regardless of status
+        setFeedbacks(data)
+      } catch (error) {
+        console.error("Failed to load feedback:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (serviceId || providerId) {
+      loadFeedbacks()
+    } else {
+      setLoading(false)
+    }
+  }, [serviceId, providerId])
+
+  if (loading) {
+    return (
+      <Card className="border-border/50">
+        <CardHeader>
+          <CardTitle>Customer Reviews</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="animate-pulse flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-secondary"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-secondary rounded w-1/4"></div>
+                  <div className="h-3 bg-secondary rounded w-3/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Show all feedbacks without filtering by status
+  const allFeedbacks = feedbacks
+
+  if (allFeedbacks.length === 0) {
+    return (
+      <Card className="border-border/50">
+        <CardHeader>
+          <CardTitle>Customer Reviews</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            No reviews yet. Be the first to review this service!
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const averageRating = allFeedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / allFeedbacks.length
+
+  // Helper function to get customer name
+  const getCustomerName = (customer: any): string => {
+    if (typeof customer === 'string') {
+      return 'Customer'
+    }
+    if (customer?.name) {
+      return customer.name
+    }
+    if (customer?.firstName || customer?.lastName) {
+      return `${customer.firstName || ''} ${customer.lastName || ''}`.trim()
+    }
+    return 'Customer'
+  }
+
+  // Helper function to get customer initials
+  const getCustomerInitials = (customer: any): string => {
+    const name = getCustomerName(customer)
+    const parts = name.split(' ')
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+    }
+    return name.substring(0, 2).toUpperCase()
+  }
 
   return (
     <Card className="border-border/50">
@@ -60,12 +137,12 @@ export function ServiceReviews() {
                 />
               ))}
             </div>
-            <div className="text-sm text-muted-foreground mt-1">{mockReviews.length} reviews</div>
+            <div className="text-sm text-muted-foreground mt-1">{allFeedbacks.length} reviews</div>
           </div>
           <div className="flex-1">
             {[5, 4, 3, 2, 1].map((stars) => {
-              const count = mockReviews.filter(r => r.rating === stars).length
-              const percentage = (count / mockReviews.length) * 100
+              const count = allFeedbacks.filter(r => r.rating === stars).length
+              const percentage = allFeedbacks.length > 0 ? (count / allFeedbacks.length) * 100 : 0
               return (
                 <div key={stars} className="flex items-center gap-2 mb-1">
                   <span className="text-sm w-4">{stars}</span>
@@ -84,30 +161,44 @@ export function ServiceReviews() {
         </div>
 
         <div className="space-y-6">
-          {mockReviews.map((review) => (
-            <div key={review.id} className="border-b border-border pb-6 last:border-0 last:pb-0">
+          {allFeedbacks.map((feedback) => (
+            <div key={feedback._id} className="border-b border-border pb-6 last:border-0 last:pb-0">
               <div className="flex items-start gap-3">
                 <Avatar>
-                  <AvatarFallback>{review.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  <AvatarFallback>
+                    {getCustomerInitials(feedback.customer)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium">{review.userName}</h4>
-                    <span className="text-sm text-muted-foreground">{review.date}</span>
+                    <h4 className="font-medium">
+                      {getCustomerName(feedback.customer)}
+                    </h4>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(feedback.createdAt || "").toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 mt-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
                         className={`h-4 w-4 ${
-                          i < review.rating
+                          i < feedback.rating
                             ? "fill-primary text-primary"
                             : "text-muted-foreground"
                         }`}
                       />
                     ))}
                   </div>
-                  <p className="text-muted-foreground mt-2">{review.comment}</p>
+                  <div className="mt-2">
+                    <h5 className="font-medium">{feedback.title}</h5>
+                    <p className="text-muted-foreground">{feedback.comment}</p>
+                    {feedback.status && feedback.status !== "approved" && (
+                      <Badge variant="secondary" className="mt-2">
+                        {feedback.status}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

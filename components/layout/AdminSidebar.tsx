@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, LayoutDashboard, Users, Briefcase, FolderTree, Calendar, LogOut } from "lucide-react"
+import { Home, LayoutDashboard, Users, Briefcase, FolderTree, Calendar, LogOut, MessageSquare, MessageCircle } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 
@@ -13,6 +13,8 @@ const navigation = [
   { name: "Services", href: "/admin/services", icon: Briefcase },
   { name: "Categories", href: "/admin/categories", icon: FolderTree },
   { name: "Bookings", href: "/admin/bookings", icon: Calendar },
+  { name: "Support", href: "/admin/support", icon: MessageSquare },
+  { name: "Feedback", href: "/admin/feedback", icon: MessageCircle },
 ]
 
 export function AdminSidebar() {

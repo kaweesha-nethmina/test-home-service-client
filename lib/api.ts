@@ -41,11 +41,18 @@ api.interceptors.response.use(
       return Promise.reject(new Error("Network error - check if backend is running"));
     }
     
+    // More detailed error handling
+    if (error.response?.status === 403) {
+      console.error("Forbidden - check user permissions");
+      return Promise.reject(new Error("You don't have permission to perform this action"));
+    }
+    
     if (error.response?.status === 401) {
       localStorage.removeItem("hs_token")
       localStorage.removeItem("hs_user")
       window.location.href = "/login"
     }
+    
     return Promise.reject(error)
   },
 )

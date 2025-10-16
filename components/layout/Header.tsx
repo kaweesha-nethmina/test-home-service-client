@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
-import { Home, User, Calendar, LogOut, Star, LayoutGrid } from "lucide-react"
+import { Home, User, Calendar, LogOut, Star, LayoutGrid, MessageSquare } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,16 +70,28 @@ export function Header() {
                 My Bookings
               </Link>
               {user.role === "customer" && (
-                <Link 
-                  href="/ratings" 
-                  className={`text-sm font-medium transition-colors ${
-                    isActive("/ratings") 
-                      ? "text-primary font-semibold" 
-                      : "text-muted-foreground hover:text-primary"
-                }`}
-                >
-                  Rate Services
-                </Link>
+                <>
+                  <Link 
+                    href="/ratings" 
+                    className={`text-sm font-medium transition-colors ${
+                      isActive("/ratings") 
+                        ? "text-primary font-semibold" 
+                        : "text-muted-foreground hover:text-primary"
+                  }`}
+                  >
+                    Rate Services
+                  </Link>
+                  <Link 
+                    href="/support" 
+                    className={`text-sm font-medium transition-colors ${
+                      isActive("/support") 
+                        ? "text-primary font-semibold" 
+                        : "text-muted-foreground hover:text-primary"
+                  }`}
+                  >
+                    Support
+                  </Link>
+                </>
               )}
             </>
           )}
@@ -129,12 +141,20 @@ export function Header() {
                   </Link>
                 </DropdownMenuItem>
                 {user.role === "customer" && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/ratings" className="cursor-pointer">
-                      <Star className="mr-2 h-4 w-4" />
-                      Rate Services
-                    </Link>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/ratings" className="cursor-pointer">
+                        <Star className="mr-2 h-4 w-4" />
+                        Rate Services
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/support" className="cursor-pointer">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Support
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="cursor-pointer">

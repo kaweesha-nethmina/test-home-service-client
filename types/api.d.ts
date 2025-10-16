@@ -106,3 +106,18 @@ export interface Notification {
   isRead: boolean
   createdAt?: string
 }
+
+export interface Feedback {
+  _id: string
+  customer: User
+  provider: User
+  service: Service
+  booking: Booking
+  rating: number
+  title: string
+  comment: string
+  isPublic: boolean
+  status: "pending" | "approved" | "rejected" | "completed"
+  createdAt?: string
+  updatedAt?: string
+}

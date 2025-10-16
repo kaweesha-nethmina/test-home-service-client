@@ -41,13 +41,12 @@ export default function CreateBookingPage() {
   const serviceId = searchParams.get("serviceId")
 
   useEffect(() => {
-    console.log("Auth state:", { authUser, authLoading, user })
     // Pre-fill customer name and phone from user data
     if (user) {
       setCustomerName(`${user.firstName} ${user.lastName}`)
       setCustomerPhone(user.phone || "")
     }
-  }, [user, authUser, authLoading])
+  }, [user])
 
   useEffect(() => {
     async function loadService() {
@@ -57,11 +56,8 @@ export default function CreateBookingPage() {
         return
       }
 
-      console.log("Attempting to load service with ID:", serviceId)
       try {
         const serviceData = await serviceService.getById(serviceId);
-        
-        console.log("Service data received:", serviceData)
         setService(serviceData as unknown as Service)
         setError(null)
       } catch (error: any) {
@@ -81,7 +77,6 @@ export default function CreateBookingPage() {
     // Only load service if auth is not loading and user is authenticated
     if (!authLoading && !authUser) {
       // User is not authenticated, redirect to login
-      console.log("User not authenticated, redirecting to login")
       router.push("/login")
       return
     }
@@ -89,7 +84,6 @@ export default function CreateBookingPage() {
     if (!authLoading && authUser) {
       // Check if user has customer role
       if (authUser.role !== "customer") {
-        console.log("User does not have customer role, redirecting. User role:", authUser.role)
         toast({
           title: "Access Denied",
           description: "Only customers can book services",
@@ -166,10 +160,9 @@ export default function CreateBookingPage() {
 
   // Show loading state while checking auth or loading service
   if (authLoading || loading) {
-    console.log("Showing loading state:", { authLoading, loading })
     return (
       <div className="min-h-screen bg-background">
-        <div>Loading...</div>
+        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-secondary rounded w-1/4"></div>
@@ -182,10 +175,9 @@ export default function CreateBookingPage() {
 
   // Show error if there's an error
   if (error) {
-    console.log("Showing error state:", error)
     return (
       <div className="min-h-screen bg-background">
-        <div>Error: {error}</div>
+        <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Error</h1>
           <p className="text-muted-foreground mb-6">{error}</p>
@@ -199,10 +191,9 @@ export default function CreateBookingPage() {
 
   // Show service not found if no service loaded
   if (!service) {
-    console.log("Showing service not found state")
     return (
       <div className="min-h-screen bg-background">
-        <div>Service not found</div>
+        <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Service not found</h1>
           <p className="text-muted-foreground mb-6">The requested service could not be found</p>
@@ -216,15 +207,6 @@ export default function CreateBookingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div>Booking page rendered</div>
-      <div>Service ID: {serviceId}</div>
-      <div>Service: {service ? "Loaded" : "Not loaded"}</div>
-      <div>Loading: {loading ? "true" : "false"}</div>
-      <div>Auth Loading: {authLoading ? "true" : "false"}</div>
-      <div>User Role: {user?.role || "Unknown"}</div>
-      <div>Auth User Role: {authUser?.role || "Unknown"}</div>
-      <div>Error: {error || "None"}</div>
-      
       <Header />
 
       <div className="container mx-auto px-4 py-8 max-w-3xl">

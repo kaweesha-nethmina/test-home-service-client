@@ -1,5 +1,5 @@
 import api from "@/lib/api"
-import type { User, Service } from "@/types/api"
+import type { User, Service, Booking } from "@/types/api"
 
 export const providerService = {
   async getPublicProfile(id: string) {
@@ -145,6 +145,121 @@ export const providerService = {
         console.error(`providerService.deleteService - Error data:`, error.response.data);
       } else {
         console.error(`providerService.deleteService - No response object in error`);
+      }
+      
+      throw error;
+    }
+  },
+
+  // Provider Booking Management Methods
+  async getBookings(): Promise<Booking[]> {
+    try {
+      console.log("providerService.getBookings - Fetching bookings");
+      const response = await api.get("/api/provider/bookings")
+      console.log("providerService.getBookings - Response:", response);
+      // Ensure we return an array even if response is not what we expect
+      return Array.isArray(response) ? response : response.data || []
+    } catch (error: any) {
+      console.error("providerService.getBookings - Error:", error);
+      
+      // Check if error.response exists before accessing its properties
+      if (error.response) {
+        console.error("providerService.getBookings - Error status:", error.response.status);
+        console.error("providerService.getBookings - Error data:", error.response.data);
+      } else {
+        console.error("providerService.getBookings - No response object in error");
+      }
+      
+      // Return empty array on error
+      return []
+    }
+  },
+
+  async getBookingById(id: string) {
+    try {
+      console.log(`providerService.getBookingById - Fetching booking ${id}`);
+      const response = await api.get(`/api/provider/bookings/${id}`)
+      console.log(`providerService.getBookingById - Response:`, response);
+      return response
+    } catch (error: any) {
+      console.error(`providerService.getBookingById - Error fetching booking ${id}:`, error);
+      
+      // Check if error.response exists before accessing its properties
+      if (error.response) {
+        console.error(`providerService.getBookingById - Error status:`, error.response.status);
+        console.error(`providerService.getBookingById - Error data:`, error.response.data);
+      } else {
+        console.error(`providerService.getBookingById - No response object in error`);
+      }
+      
+      throw error;
+    }
+  },
+
+  async updateBookingStatus(id: string, status: string) {
+    try {
+      console.log(`providerService.updateBookingStatus - Updating booking ${id} status to ${status}`);
+      const response = await api.put(`/api/provider/bookings/${id}/status`, { status })
+      console.log(`providerService.updateBookingStatus - Response:`, response);
+      return response
+    } catch (error: any) {
+      console.error(`providerService.updateBookingStatus - Error updating booking ${id}:`, error);
+      
+      // Check if error.response exists before accessing its properties
+      if (error.response) {
+        console.error(`providerService.updateBookingStatus - Error status:`, error.response.status);
+        console.error(`providerService.updateBookingStatus - Error data:`, error.response.data);
+      } else {
+        console.error(`providerService.updateBookingStatus - No response object in error`);
+      }
+      
+      throw error;
+    }
+  },
+
+  async deleteBooking(id: string) {
+    try {
+      console.log(`providerService.deleteBooking - Deleting booking ${id}`);
+      const response = await api.delete(`/api/provider/bookings/${id}`)
+      console.log(`providerService.deleteBooking - Response:`, response);
+      return response
+    } catch (error: any) {
+      console.error(`providerService.deleteBooking - Error deleting booking ${id}:`, error);
+      
+      // Check if error.response exists before accessing its properties
+      if (error.response) {
+        console.error(`providerService.deleteBooking - Error status:`, error.response.status);
+        console.error(`providerService.deleteBooking - Error data:`, error.response.data);
+      } else {
+        console.error(`providerService.deleteBooking - No response object in error`);
+      }
+      
+      throw error;
+    }
+  },
+
+  // Image upload method
+  async uploadImage(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await api.post("/api/providers/upload/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      
+      return response;
+    } catch (error: any) {
+      console.error("providerService.uploadImage - Error:", error);
+      
+      // Check if error.response exists before accessing its properties
+      if (error.response) {
+        console.error("providerService.uploadImage - Error status:", error.response.status);
+        console.error("providerService.uploadImage - Error data:", error.response.data);
+      } else {
+        console.error("providerService.uploadImage - No response object in error");
       }
       
       throw error;

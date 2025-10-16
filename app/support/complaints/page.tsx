@@ -13,14 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, MessageSquare } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-
-interface Complaint {
-  _id: string
-  subject: string
-  description: string
-  status: string
-  createdAt: string
-}
+import type { Complaint } from "@/types/api"
 
 export default function ComplaintsPage() {
   const { toast } = useToast()
@@ -39,7 +32,7 @@ export default function ComplaintsPage() {
   const loadComplaints = async () => {
     try {
       const data = await supportService.getComplaints()
-      setComplaints(data)
+      setComplaints(data.data || data)
     } catch (error) {
       toast({
         title: "Error",
@@ -54,7 +47,7 @@ export default function ComplaintsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await supportService.createComplaint(formData)
+      await supportService.raiseComplaint(formData)
       toast({
         title: "Success",
         description: "Complaint submitted successfully",
@@ -79,6 +72,10 @@ export default function ComplaintsPage() {
         return "bg-warning/10 text-warning border-warning/20"
       case "in-progress":
         return "bg-primary/10 text-primary border-primary/20"
+      case "open":
+        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+      case "closed":
+        return "bg-secondary text-secondary-foreground"
       default:
         return "bg-muted text-muted-foreground"
     }
@@ -157,7 +154,7 @@ export default function ComplaintsPage() {
                 </div>
                 <p className="text-muted-foreground mb-3">{complaint.description}</p>
                 <p className="text-sm text-muted-foreground">
-                  Submitted on {new Date(complaint.createdAt).toLocaleDateString()}
+                  Submitted on {new Date(complaint.createdAt || "").toLocaleDateString()}
                 </p>
               </Card>
             ))}

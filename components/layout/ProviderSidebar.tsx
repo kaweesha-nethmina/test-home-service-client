@@ -3,15 +3,15 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, LayoutDashboard, Briefcase, Settings, LogOut, MessageSquare, Star } from "lucide-react"
+import { Home, LayoutDashboard, Briefcase, Settings, LogOut, MessageSquare, Star, MessageCircle, Calendar } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 
 const navigation = [
   { name: "Dashboard", href: "/provider", icon: LayoutDashboard },
-  { name: "My Portfolio", href: "/provider/works", icon: Briefcase },
   { name: "Services", href: "/provider/services", icon: Home },
-  { name: "Ratings", href: "/provider/ratings", icon: Star },
+  { name: "Bookings", href: "/provider/bookings", icon: Calendar },
+  { name: "Feedback", href: "/provider/feedback", icon: MessageCircle },
   { name: "Support", href: "/provider/support", icon: MessageSquare },
   { name: "Profile", href: "/provider/profile", icon: Settings },
 ]

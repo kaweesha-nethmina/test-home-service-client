@@ -1,5 +1,5 @@
 import api from '@/lib/api';
-import { User, Service, Category, Booking } from '@/types/api';
+import { User, Service, Category, Booking, Complaint, Notification, Feedback } from '@/types/api';
 
 // User Management
 const getAllUsers = () => api.get<User[]>('/api/admin/users');
@@ -22,6 +22,24 @@ const getAllBookings = () => api.get<Booking[]>('/api/admin/bookings');
 const updateBookingStatus = (id: string, status: string) => 
   api.put(`/api/admin/bookings/${id}/status`, { status });
 
+// Support Management
+const getAllComplaints = () => api.get<Complaint[]>('/api/support/complaints');
+const updateComplaintStatus = (id: string, data: { status?: string; assignedTo?: string }) => 
+  api.put<Complaint>(`/api/support/complaints/${id}`, data);
+const getAllNotifications = () => api.get<Notification[]>('/api/support/notifications');
+const createNotification = (data: Partial<Notification>) => 
+  api.post<Notification>('/api/support/notifications', data);
+
+// Feedback Management
+const getAllFeedbacks = () => api.get<Feedback[]>('/api/admin/feedbacks');
+const getFeedbackById = (id: string) => api.get<Feedback>(`/api/admin/feedbacks/${id}`);
+const updateFeedback = (id: string, data: Partial<Feedback>) => 
+  api.put<Feedback>(`/api/admin/feedbacks/${id}`, data);
+const deleteFeedback = (id: string) => api.delete(`/api/admin/feedbacks/${id}`);
+
+// Ratings Management
+const getAllRatings = () => api.get<any[]>('/api/admin/ratings');
+
 // Export all functions as a named object
 export const adminService = {
   getAllUsers,
@@ -35,5 +53,14 @@ export const adminService = {
   createCategory,
   updateCategory,
   getAllBookings,
-  updateBookingStatus
+  updateBookingStatus,
+  getAllComplaints,
+  updateComplaintStatus,
+  getAllNotifications,
+  createNotification,
+  getAllFeedbacks,
+  getFeedbackById,
+  updateFeedback,
+  deleteFeedback,
+  getAllRatings
 };

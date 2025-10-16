@@ -30,9 +30,20 @@ export const supportService = {
     const response = await api.get(`/api/support/ratings/provider/${providerId}`)
     return response
   },
+  
+  async getAllRatings() {
+    // This would require an admin endpoint
+    const response = await api.get("/api/admin/ratings")
+    return response
+  },
 
   async getNotifications() {
     const response = await api.get("/api/support/notifications")
+    return response
+  },
+
+  async markNotificationAsRead(notificationId: string) {
+    const response = await api.put(`/api/support/notifications/${notificationId}/read`)
     return response
   },
 

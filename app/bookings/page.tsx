@@ -9,7 +9,7 @@ import { bookingService } from "@/services/bookingService"
 import { serviceService } from "@/services/serviceService"
 import { useRequireAuth } from "@/hooks/useRequireAuth"
 import type { Booking, Service } from "@/types/api"
-import { Calendar, Clock, X } from "lucide-react"
+import { Calendar, Clock, X, MessageSquare } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import {
   AlertDialog,
@@ -22,11 +22,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import api from "@/lib/api"
+import { FeedbackModal } from "@/components/shared/FeedbackModal"
 
 export default function BookingsPage() {
   const { isLoading: authLoading } = useRequireAuth({ roles: ["customer"] })
   const [bookings, setBookings] = useState<Booking[]>([])
   const [serviceImages, setServiceImages] = useState<Record<string, string>>({})
+  const [feedbackBooking, setFeedbackBooking] = useState<Booking | null>(null)
   
   useEffect(() => {
     if (!authLoading) {
@@ -274,12 +276,27 @@ export default function BookingsPage() {
                         )}
                       </div>
 
-                      {booking.status === "pending" && (
-                        <Button variant="outline" size="sm" onClick={() => setCancelId(booking._id)}>
-                          <X className="h-4 w-4 mr-2" />
-                          Cancel
-                        </Button>
-                      )}
+                      <div className="flex flex-col gap-2">
+                        {booking.status === "pending" && (
+                          <Button variant="outline" size="sm" onClick={() => setCancelId(booking._id)}>
+                            <X className="h-4 w-4 mr-2" />
+                            Cancel
+                          </Button>
+                        )}
+                        {booking.status === "completed" && (
+                          <Button 
+                            size="sm" 
+                            onClick={() => {
+                              setFeedbackBooking(booking);
+                            }}
+                            className="bg-primary hover:bg-primary/90"
+                          >
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Submit Feedback
+                          </Button>
+                        )}
+                      </div>
+                      
                     </div>
                   </CardContent>
                 </Card>
@@ -304,6 +321,15 @@ export default function BookingsPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {feedbackBooking && (
+          <FeedbackModal
+            open={!!feedbackBooking}
+            onOpenChange={(open) => !open && setFeedbackBooking(null)}
+            booking={feedbackBooking}
+            onSubmit={loadBookings}
+          />
+        )}
       </div>
     </div>
   )

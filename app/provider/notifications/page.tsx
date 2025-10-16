@@ -8,15 +8,19 @@ import { Button } from "@/components/ui/button"
 import { Bell, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { Notification } from "@/types/api"
+import { useRequireAuth } from "@/hooks/useRequireAuth"
 
-export default function NotificationsPage() {
+export default function ProviderNotificationsPage() {
+  const { isLoading: authLoading } = useRequireAuth({ roles: ["provider"] })
   const { toast } = useToast()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadNotifications()
-  }, [])
+    if (!authLoading) {
+      loadNotifications()
+    }
+  }, [authLoading])
 
   const loadNotifications = async () => {
     try {
@@ -49,46 +53,56 @@ export default function NotificationsPage() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "success":
-        return "bg-success/10 text-success border-success/20"
+        return "bg-green-500/10 text-green-500 border-green-500/20"
       case "warning":
-        return "bg-warning/10 text-warning border-warning/20"
+        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+      case "error":
+        return "bg-red-500/10 text-red-500 border-red-500/20"
       case "info":
-        return "bg-primary/10 text-primary border-primary/20"
+        return "bg-blue-500/10 text-blue-500 border-blue-500/20"
       default:
         return "bg-muted text-muted-foreground"
     }
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Notifications</h1>
-          <p className="text-muted-foreground">Stay updated with your latest activities</p>
-        </div>
-
-        {loading ? (
+  if (authLoading || loading) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-secondary rounded w-1/4"></div>
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <Card key={i} className="p-6 animate-pulse">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                <div className="h-3 bg-muted rounded w-1/4" />
-              </Card>
+              <div key={i} className="h-24 bg-secondary rounded"></div>
             ))}
           </div>
-        ) : notifications.length === 0 ? (
-          <Card className="p-12 text-center">
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-8 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Notifications</h1>
+        <p className="text-muted-foreground">Stay updated with your latest activities</p>
+      </div>
+
+      {notifications.length === 0 ? (
+        <Card className="border-border/50">
+          <div className="p-12 text-center">
             <Bell className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">No notifications</h3>
             <p className="text-muted-foreground">You're all caught up! Check back later for updates.</p>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {notifications.map((notification) => (
-              <Card
-                key={notification._id}
-                className={`p-6 ${!notification.isRead ? "border-primary/50 bg-primary/5" : ""}`}
-              >
+          </div>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {notifications.map((notification) => (
+            <Card
+              key={notification._id}
+              className={`border-border/50 ${!notification.isRead ? "border-primary/50 bg-primary/5" : ""}`}
+            >
+              <div className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -109,11 +123,11 @@ export default function NotificationsPage() {
                     </Button>
                   )}
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
